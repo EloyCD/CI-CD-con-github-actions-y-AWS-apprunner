@@ -1,0 +1,45 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Deploy to App Runner
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+      # Utiliza una variable de entorno para la región y almacénala como un secreto
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          # Referencia la variable de entorno para la región
+
+      - name: Configure and Deploy to App Runner
+        run: |
+          aws apprunner create-service \
+            --service-name your-service-name \
+            --source-repo your-github-repo-url \
+            --source-branch main \
+            --runtime python \
+            --build-command "npm install && npm run build" \
+            --start-command "npm start" \
+            --region ${{ secrets.AWS_REGION }}
+            # Referencia la variable de entorno para la región
+
+
+
+
