@@ -37,7 +37,10 @@ jobs:
             --runtime python \
             --build-command "npm install && npm run build" \
             --start-command "npm start" \
-            --region ${{ secrets.AWS_REGION }}
+            --region ${{ secrets.AWS_REGION }} \
+            --cpu 1 \
+            --memory 2 \
+            --wait-for-service-stability-seconds 600
 
           # Obtener el App Runner URL después de la creación del servicio
           APPRUNNER_URL=$(aws apprunner describe-service --service-name your-service-name --query "Service.Url" --output text)
@@ -49,4 +52,5 @@ jobs:
             --source-configuration "runtime=python,buildCommand=npm install && npm run build,startCommand=npm start" \
             --port 5000 \
             --region ${{ secrets.AWS_REGION }}
+
 
