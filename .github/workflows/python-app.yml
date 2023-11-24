@@ -26,23 +26,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Create App Runner Source
-        run: |
-          SOURCE_ARN=$(aws apprunner create-connection \
-            --name your-source-connection-name \
-            --provider-type GitHub \
-            --repository-url https://github.com/EloyCD/repositoriogitactions.git \
-            --branch-name main \
-            --region ${{ secrets.AWS_REGION }} \
-            --query "ConnectionSummary.ConnectionArn" \
-            --output text)
-          echo "Source ARN: $SOURCE_ARN"
+
 
       - name: Configure and Deploy to App Runner
-        run: |
+        run: 
           aws apprunner create-service \
             --service-name your-service-name \
-            --source-connection-arn $SOURCE_ARN \
+            --source-connection-arn ${{ secrets.AWS_CONNECTION_SOURCE_ARN }} \
             --runtime PYTHON_3.8 \
             --source-configuration "runtime=PYTHON_3.8,buildCommand=python -m pip install -r requirements.txt,startCommand=python app.py" \
             --region ${{ secrets.AWS_REGION }} \
