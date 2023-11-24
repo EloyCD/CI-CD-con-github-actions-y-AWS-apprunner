@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
-name: Deploy to App Runner
+name: Deploy to AWS App Runner
 
 on:
   push:
@@ -12,42 +12,39 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    env:
-      AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+    - name: Set up AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
 
-     
+    - name: Deploy to App Runner
+      id: deploy-apprunner
+      uses: awslabs/amazon-app-runner-deploy@main
+      with:
+        service: app-runner-git-deploy-service
+        source-connection-arn: ${{ secrets.AWS_CONNECTION_SOURCE_ARN }}
+        repo: https://github.com/EloyCD/repositoriogitactions.git
+        branch: main
+        runtime: PYTHON_3
+        build-command: pip install -r requirements.txt
+        start-command: python app.py  
+        port: 5000
+        region: ${{ secrets.AWS_REGION }}
+        cpu: 1
+        memory: 2
+        wait-for-service-stability-seconds: 600
+        tags: >
+          { "env": "test" }
 
-      - name: Configure and Deploy to App Runner
-        run: |
-          aws apprunner create-service \
-            --service-name your-service-name \
-            --source-connection-arn ${{ secrets.AWS_CONNECTION_SOURCE_ARN }} \
-            --runtime PYTHON_3.8 \
-            --source-configuration "runtime=PYTHON_3.8,buildCommand=python -m pip install -r requirements.txt,startCommand=python app.py" \
-            --region ${{ secrets.AWS_REGION }} \
-            --cpu 1 \
-            --memory 2 \
-            --wait-for-service-stability-seconds 600
+    - name: Esperar antes de actualizar el servicio
+      run: sleep 180  # Espera 3 minutos
 
-          # Obtener el App Runner URL después de la creación del servicio
-          APPRUNNER_URL=$(aws apprunner describe-service --service-name your-service-name --query "Service.Url" --output text)
-          echo "App Runner URL: $APPRUNNER_URL"
-
-          # Aquí puedes agregar un comando adicional para configurar el puerto en tu aplicación
-          aws apprunner update-service \
-            --service-name your-service-name \
-            --source-configuration "runtime=PYTHON_3.8,buildCommand=python -m pip install -r requirements.txt,startCommand=python app.py" \
-            --port 5000 \
-            --region ${{ secrets.AWS_REGION }}
+    - name: App Runner URL
+      run: echo "App runner URL ${{ steps.deploy-apprunner.outputs.service-url }}"
 
