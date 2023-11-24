@@ -12,10 +12,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    env:
-      AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
-      # Utiliza una variable de entorno para la región y almacénala como un secreto
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -34,7 +30,7 @@ jobs:
             --service-name your-service-name \
             --source-repo https://github.com/EloyCD/repositoriogitactions.git \
             --source-branch main \
-            --runtime python \
+            --runtime PYTHON_3.8 \
             --build-command "npm install && npm run build" \
             --start-command "npm start" \
             --region ${{ secrets.AWS_REGION }}
@@ -49,4 +45,6 @@ jobs:
             --source-configuration "runtime=python,buildCommand=npm install && npm run build,startCommand=npm start" \
             --port 5000 \
             --region ${{ secrets.AWS_REGION }}
+
+
 
