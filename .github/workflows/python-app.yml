@@ -31,10 +31,20 @@ jobs:
             --source-connection-arn ${{ secrets.AWS_CONNECTION_SOURCE_ARN }} \
             --source-repo https://github.com/EloyCD/repositoriogitactions.git \
             --source-branch main \
+<<<<<<< HEAD
             --runtime PYTHON_3.8 \
             --build-command "python -m pip install -r requirements.txt" \
             --start-command "python your_start_script.py" \
             --region ${{ secrets.AWS_REGION }}
+=======
+            --runtime python \
+            --build-command python -m pip install -r requirements.txt \
+            --start-command app.py\
+            --region ${{ secrets.AWS_REGION }} \
+            --cpu 1 \
+            --memory 2 \
+            --wait-for-service-stability-seconds 600
+>>>>>>> 57d358da45e309ff2f570aea8f60360dba9355c8
 
           # Obtener el App Runner URL después de la creación del servicio
           APPRUNNER_URL=$(aws apprunner describe-service --service-name your-service-name --query "Service.Url" --output text)
@@ -48,4 +58,7 @@ jobs:
             --region ${{ secrets.AWS_REGION }}
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 57d358da45e309ff2f570aea8f60360dba9355c8
