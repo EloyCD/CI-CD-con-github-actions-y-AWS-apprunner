@@ -12,6 +12,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -22,20 +25,30 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-          # Referencia la variable de entorno para la región
+
+      - name: Create App Runner Source
+        run: |
+          SOURCE_ARN=$(aws apprunner create-connection \
+            --name your-source-connection-name \
+            --provider-type GitHub \
+            --repository-url https://github.com/EloyCD/repositoriogitactions.git \
+            --branch-name main \
+            --region ${{ secrets.AWS_REGION }} \
+            --query "ConnectionSummary.ConnectionArn" \
+            --output text)
+          echo "Source ARN: $SOURCE_ARN"
 
       - name: Configure and Deploy to App Runner
         run: |
           aws apprunner create-service \
             --service-name your-service-name \
-            --source-connection-arn ${{ secrets.AWS_CONNECTION_SOURCE_ARN }} \
-            --source-repo https://github.com/EloyCD/repositoriogitactions.git \
-            --source-branch main \
+            --source-connection-arn $SOURCE_ARN \
             --runtime PYTHON_3.8 \
-            --source-configuration "runtime=PYTHON_3.8" \
-            --build-command "python -m pip install -r requirements.txt" \
-            --start-command "python app.py" \
-            --region ${{ secrets.AWS_REGION }}
+            --source-configuration "runtime=PYTHON_3.8,buildCommand=python -m pip install -r requirements.txt,startCommand=python app.py" \
+            --region ${{ secrets.AWS_REGION }} \
+            --cpu 1 \
+            --memory 2 \
+            --wait-for-service-stability-seconds 600
 
           # Obtener el App Runner URL después de la creación del servicio
           APPRUNNER_URL=$(aws apprunner describe-service --service-name your-service-name --query "Service.Url" --output text)
@@ -44,8 +57,7 @@ jobs:
           # Aquí puedes agregar un comando adicional para configurar el puerto en tu aplicación
           aws apprunner update-service \
             --service-name your-service-name \
-            --source-configuration "runtime=python,buildCommand=npm install && npm run build,startCommand=npm start" \
+            --source-configuration "runtime=PYTHON_3.8,buildCommand=python -m pip install -r requirements.txt,startCommand=python app.py" \
             --port 5000 \
             --region ${{ secrets.AWS_REGION }}
-
 
