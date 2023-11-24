@@ -32,7 +32,7 @@ jobs:
             --source-repo https://github.com/EloyCD/repositoriogitactions.git \
             --source-branch main \
             --runtime PYTHON_3.8 \
-            --source-configuration "runtime=PYTHON_3.8 \
+            --source-configuration "runtime=PYTHON_3.8" \
             --build-command "python -m pip install -r requirements.txt" \
             --start-command "python app.py" \
             --region ${{ secrets.AWS_REGION }}
