@@ -35,8 +35,8 @@ jobs:
             --source-repo https://github.com/EloyCD/repositoriogitactions.git \
             --source-branch main \
             --runtime python \
-            --build-command "npm install && npm run build" \
-            --start-command "npm start" \
+            --build-command python -m pip install -r requirements.txt \
+            --start-command app.py\
             --region ${{ secrets.AWS_REGION }} \
             --cpu 1 \
             --memory 2 \
