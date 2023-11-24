@@ -32,13 +32,16 @@ jobs:
         run: |
           aws apprunner create-service \
             --service-name your-service-name \
-            --source-repo https://github.com/EloyCD/repositoriogitactions.git 
-            --source-repo your-github-repo-url \
+            --source-repo https://github.com/EloyCD/repositoriogitactions.git \
             --source-branch main \
             --runtime python \
             --build-command "npm install && npm run build" \
             --start-command "npm start" \
             --region ${{ secrets.AWS_REGION }}
+
+          # Obtener el App Runner URL después de la creación del servicio
+          APPRUNNER_URL=$(aws apprunner describe-service --service-name your-service-name --query "Service.Url" --output text)
+          echo "App Runner URL: $APPRUNNER_URL"
 
           # Aquí puedes agregar un comando adicional para configurar el puerto en tu aplicación
           aws apprunner update-service \
