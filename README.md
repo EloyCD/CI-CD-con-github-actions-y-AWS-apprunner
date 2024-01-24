@@ -15,4 +15,4 @@ Asegúrate de tener una cuenta en Amazon Web Services (AWS).
 Configura un nuevo proyecto y habilita Amazon Web Services en tu consola de AWS.
 
 🌐 Configuración de GitHub Actions:
-Configura las secrecías necesarias en tu repositorio de GitHub para interactuar con AWS. Consulta docs/GitHubActionsSetup.md para obtener detalles.
+Realiza las configuraciones necesarias en tu repositorio de GitHub para interactuar con AWS. Consulta docs/GitHubActionsSetup.md para obtener detalles.
